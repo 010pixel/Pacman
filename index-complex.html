@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Pacman</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<style type="text/css">
+		#pacman-container div span {
+			display: inline-block;
+			height: 10px;
+			width: 15px;
+			text-align: center;
+		}
+	</style>
+</head>
+<body>
+
+	<label><input type="checkbox" name="keepMoving" id="keepMoving"> Keep Moving</label>
+	<label>
+		<select id="speed">
+			<option value="500">Slow</option>
+			<option value="300">Medium</option>
+			<option value="100">Fast</option>
+		</select>
+		Speed
+	</label>
+
+	<div id="pacman-container"></div>
+
+</body>
+
+	<script type="text/javascript">
+		var world = [
+		  ["┌","─","─","─","─","─","─","─","─","─","─","─","─","┬","┬","─","─","─","─","─","─","─","─","─","─","─","─","┐"],
+		  ["│",".",".",".",".",".",".",".",".",".",".",".",".","│","│",".",".",".",".",".",".",".",".",".",".",".",".","│"],
+		  ["│",".","┌","─","─","┐",".","┌","─","─","─","┐",".","│","│",".","┌","─","─","─","┐",".","┌","─","─","┐",".","│"],
+		  ["│",".","│"," "," ","│",".","│"," "," "," ","│",".","│","│",".","│"," "," "," ","│",".","│"," "," ","│",".","│"],
+		  ["│",".","└","─","─","┘",".","└","─","─","─","┘",".","└","┘",".","└","─","─","─","┘",".","└","─","─","┘",".","│"],
+		  ["│",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","│"],
+		  ["│",".","┌","─","─","┐",".","┌","┐",".","┌","─","─","─","─","─","─","┐",".","┌","┐",".","┌","─","─","┐",".","│"],
+		  ["│",".","└","─","─","┘",".","│","│",".","└","─","─","┐","┌","─","─","┘",".","│","│",".","└","─","─","┘",".","│"],
+		  ["│",".",".",".",".",".",".","│","│",".",".",".",".","│","│",".",".",".",".","│","│",".",".",".",".",".",".","│"],
+		  ["├","─","─","─","─","┐",".","│","├","─","─","┐",".","│","│",".","┌","─","─","┤","│",".","┌","─","─","─","─","┤"],
+		  ["│"," "," "," "," ","│",".","│","├","─","─","┘",".","└","┘",".","└","─","─","┤","│",".","│"," "," "," "," ","│"],
+		  ["│"," "," "," "," ","│",".","│","│",".",".",".",".",".",".",".",".",".",".","│","│",".","│"," "," "," "," ","│"],
+		  ["│"," "," "," "," ","│",".","│","│",".","┌","─","─","─","─","─","─","┐",".","│","│",".","│"," "," "," "," ","│"],
+		  ["├","─","─","─","─","┘",".","└","┘",".","│"," "," "," "," "," "," ","│",".","└","┘",".","└","─","─","─","─","┤"],
+		  [".",".",".",".",".",".",".",".",".",".","│"," "," "," "," "," "," ","│",".",".",".",".",".",".",".",".",".","."],
+		  ["├","─","─","─","─","┐",".","┌","┐",".","│"," "," "," "," "," "," ","│",".","┌","┐",".","┌","─","─","─","─","┤"],
+		  ["│"," "," "," "," ","│",".","│","│",".","└","─","─","─","─","─","─","┘",".","│","│",".","│"," "," "," "," ","│"],
+		  ["│"," "," "," "," ","│",".","│","│",".",".",".",".","P",".",".",".",".",".","│","│",".","│"," "," "," "," ","│"],
+		  ["│"," "," "," "," ","│",".","│","│",".","┌","─","─","─","─","─","─","┐",".","│","│",".","│"," "," "," "," ","│"],
+		  ["├","─","─","─","─","┘",".","└","┘",".","└","─","─","┐","┌","─","─","┘",".","└","┘",".","└","─","─","─","─","┤"],
+		  ["│",".",".",".",".",".",".",".",".",".",".",".",".","│","│",".",".",".",".",".",".",".",".",".",".",".",".","│"],
+		  ["│",".","┌","─","─","┐",".","┌","─","─","─","┐",".","│","│",".","┌","─","─","─","┐",".","┌","─","─","┐",".","│"],
+		  ["│",".","└","─","┐","│",".","└","─","─","─","┘",".","└","┘",".","└","─","─","─","┘",".","│","┌","─","┘",".","│"],
+		  ["│",".",".",".","│","│",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","│","│",".",".",".","│"],
+		  ["├","─","┐",".","│","│",".","┌","┐",".","┌","─","─","─","─","─","─","┐",".","┌","┐",".","│","│",".","┌","─","┤"],
+		  ["├","─","┘",".","└","┘",".","│","│",".","└","─","─","┐","┌","─","─","┘",".","│","│",".","└","┘",".","└","─","┤"],
+		  ["│",".",".",".",".",".",".","│","│",".",".",".",".","│","│",".",".",".",".","│","│",".",".",".",".",".",".","│"],
+		  ["│",".","┌","─","─","─","─","┘","└","─","─","┐",".","│","│",".","┌","─","─","┘","└","─","─","─","─","┐",".","│"],
+		  ["│",".","└","─","─","─","─","─","─","─","─","┘",".","└","┘",".","└","─","─","─","─","─","─","─","─","┘",".","│"],
+		  ["│",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","│"],
+		  ["└","─","─","─","─","─","─","─","─","─","─","─","─","─","─","─","─","─","─","─","─","─","─","─","─","─","─","┘"]
+		];
+
+		let currentPosition = [13,17];
+		const worldWidth = world[0].length;
+		const worldHeight = world.length;
+		const keepMoving = document.getElementById('keepMoving');
+		const speed = document.getElementById('speed');
+		let intervalHolder;
+		let nextMoveDirection;
+		let directions = [];
+		let currentDirection;
+
+		createPacman(world);
+
+		setEvents();
+
+		function setEvents () {
+			document.onkeydown = function(e) {
+				switch (e.keyCode) {
+					case 37:
+						directions.push("left");
+						moveIt();
+						break;
+					case 38:
+						directions.push("up");
+						moveIt();
+						break;
+					case 39:
+						directions.push("right");
+						moveIt();
+						break;
+					case 40:
+						directions.push("down");
+						moveIt();
+						break;
+				}
+			};
+		}
+
+		function createPacman ( data ) {
+
+			var returnHtml = [];
+
+			for ( var i in data ) {
+				returnHtml.push(createRow(data[i]));
+			}
+
+			returnHtml = "<div>" + returnHtml.join("</div><div>") + "</div>";
+
+			document.getElementById('pacman-container').innerHTML = returnHtml;
+		}
+
+		function createRow ( d ) {
+
+			var returnHtml = "<span>" + d.join("</span><span>") + "</span>";
+
+			return returnHtml;
+
+		}
+
+		function moveIt() {
+
+			for ( let i = 0; i < directions.length; i++ ) {
+				var newPosition = getPosition(directions[i]);
+				var isValidPosition = checkValidPosition(newPosition);
+				if ( isValidPosition ) {
+					currentDirection = directions[i];
+					directions.shift();
+					break;
+				}
+			}
+
+			var finalPosition = getPosition(currentDirection);
+			var isValidPosition = checkValidPosition(finalPosition);
+			if ( !isValidPosition ) {
+				return;
+			}
+
+			clearTimeout(intervalHolder);
+
+			setIcon(currentPosition[0], currentPosition[1], '');
+			setIcon(finalPosition[0], finalPosition[1], 'P');
+			currentPosition  = finalPosition;
+
+			if ( !keepMoving.checked ) return;
+
+			intervalHolder = setTimeout(function() {
+				moveIt();
+			}, speed.value);
+
+		}
+
+		function getPosition(direction) {
+			var pacManX = currentPosition[0];
+			var pacManY = currentPosition[1];
+
+			switch(direction) {
+				case 'left':
+				pacManX--;
+				break;
+
+				case 'right':
+				pacManX++;
+				break;
+
+				case 'up':
+				pacManY--;
+				break;
+
+				case 'down':
+				pacManY++;
+				break;
+			}
+
+			if ( pacManX < 0 ) {
+				pacManX = worldWidth - 1;
+			} else if ( pacManX === worldWidth ) {
+				pacManX = 0;
+			}
+			if ( pacManY < 0 ) {
+				pacManY = worldHeight - 1;
+			} else if ( pacManY === worldHeight ) {
+				pacManY = 0;
+			}
+
+			return [pacManX, pacManY];
+		}
+
+		function checkValidPosition ( position ) {
+			return world[position[1]][position[0]] === "." || world[position[1]][position[0]] === "";
+		}
+
+		function setIcon(xPos, yPos, character) {
+			document.getElementById('pacman-container').children[yPos].children[xPos].innerHTML = character;
+			world[yPos][xPos] = character;
+		}
+	</script>
+
+</html>
